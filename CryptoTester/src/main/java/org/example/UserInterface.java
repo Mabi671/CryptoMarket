@@ -3,29 +3,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class UserInterface {
+    private final Color darkRed = new Color(150, 0, 0);
+    private final JFrame mainFrame = BetterJFrame.BJFrame(1200, 800, Color.BLACK,true,null);
+    private final JPanel managePanel = BetterJFrame.BJPanel(0, 0, 1200, 800, new Color(0, 155, 0), false, null, mainFrame);
     private final JPanel cryptoInfoPanel = new JPanel();
     private final JScrollPane cryptoInfoScroll = new JScrollPane(cryptoInfoPanel);
-    private final JFrame mainFrame = new JFrame("Trader");
-    protected JTextArea saldoAmountText = new JTextArea();
-    public String[] userData = new String[2];
-    private final JPanel managePanel = new JPanel();
-    private final JPanel saldoPanel = new JPanel();
+    protected JTextField saldoAmountText = BetterJFrame.BJTextField(300, 50, 215, 30, darkRed, true, managePanel, false);
+    public List userData = new List();
+    private final JPanel saldoPanel = BetterJFrame.BJPanel(0, 200, 1200, 800, Color.blue, false, new FlowLayout(), managePanel);
     protected JFrame makeUserInterface() {
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setLayout(null);
-        mainFrame.setSize(1200, 800);
-        mainFrame.setResizable(false);
-        mainFrame.setVisible(true);
-        saldoPanel.setVisible(false);
-        saldoPanel.setBackground(Color.blue);
-        saldoPanel.setLayout(new FlowLayout());
-        saldoPanel.setBounds(0, 200, 1200, 800);
-        managePanel.add(saldoPanel);
-        JPanel registerPage = new JPanel();
-        registerPage.setVisible(false);
+        JPanel registerPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.BLACK, false, null, mainFrame);
+        JPanel loginPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.black,true, null, mainFrame);
         cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
         cryptoInfoPanel.setLayout(new FlowLayout());
         cryptoInfoPanel.setBackground(Color.BLUE);
@@ -34,14 +26,8 @@ public class UserInterface {
         cryptoInfoScroll.setBackground(Color.BLUE);
         cryptoInfoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         cryptoInfoScroll.getVerticalScrollBar().setUnitIncrement(20);
-
-        managePanel.setVisible(false);
-        managePanel.setBounds(0, 0, 1200, 800);
-        managePanel.setBackground(Color.green);
-        managePanel.setLayout(null);
-        JButton trade = new JButton("GET PRICES");
-        trade.setBounds(50, 50, 200, 50);
-        trade.setBackground(Color.red);
+        JButton trade = BetterJFrame.BJButton(50, 50, 200, 50, darkRed, true, managePanel, "GET PRICES");
+        trade.setForeground(Color.WHITE);
         trade.addActionListener(e -> {
             try {
                 saldoPanel.removeAll();
@@ -67,11 +53,20 @@ public class UserInterface {
             } catch (InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
-
         });
-        JButton currSaldo = new JButton("YOUR CRYPTO");
-        currSaldo.setBackground(Color.red);
-        currSaldo.setBounds(600, 50, 200, 50);
+        JButton logOut = BetterJFrame.BJButton(900, 50, 200, 50, Color.darkGray, true, managePanel, "LOGOUT");
+        logOut.setForeground(Color.WHITE);
+        logOut.addActionListener(e -> {
+            loginPage.setVisible(true);
+            managePanel.setVisible(false);
+            saldoPanel.removeAll();
+            cryptoInfoPanel.removeAll();
+            cryptoInfoPanel.setVisible(false);
+            cryptoInfoScroll.setVisible(false);
+            saldoPanel.setVisible(false);
+        });
+        JButton currSaldo = BetterJFrame.BJButton(600, 50, 200, 50, darkRed, true, managePanel, "YOUR CRYPTOS");
+        currSaldo.setForeground(Color.WHITE);
         currSaldo.addActionListener(e ->{
             cryptoInfoScroll.setVisible(false);
             cryptoInfoPanel.removeAll();
@@ -91,123 +86,83 @@ public class UserInterface {
                 saldoPanel.add(saldoInfoPanel);
             }
         });
-        managePanel.add(trade);
-        managePanel.add(currSaldo);
-        saldoAmountText.setBounds(300, 50, 215, 30);
-        saldoAmountText.setBackground(Color.red);
+        saldoAmountText.setForeground(Color.WHITE);
         saldoAmountText.setText("Money: " + "0");
         saldoAmountText.setFont(new Font("Arial", Font.BOLD, 25));
-        saldoAmountText.setEditable(false);
-        managePanel.add(saldoAmountText);
-        mainFrame.add(managePanel);
-
-        JPanel loginPage = new JPanel();
-        loginPage.setLayout(null);
-        loginPage.setBounds(400, 175, 400, 400);
-        loginPage.setBackground(Color.black);
-        JTextPane loginText = new JTextPane();
-        loginText.setBounds(100, 100, 200, 25);
+        JTextField loginText = BetterJFrame.BJTextField(100, 100, 200, 25, Color.WHITE, true, loginPage, true);
+        loginText.setToolTipText("Username");
         JPasswordField passwordText = new JPasswordField();
+        passwordText.setToolTipText("Password");
         passwordText.setBounds(100, 150, 200, 25);
-        JButton loginButton = new JButton("LOGIN");
-        JTextPane loginDataError = new JTextPane();
-
+        JButton loginButton = BetterJFrame.BJButton(100, 200, 200, 25, Color.WHITE, true, loginPage, "LOGIN");
+        JTextField loginDataError = BetterJFrame.BJTextField(100, 300, 200, 25, darkRed, false, loginPage, false);
         loginDataError.setText("Wrong Data");
-        loginDataError.setEditable(false);
-        loginDataError.setBackground(Color.red);
-        loginDataError.setBounds(100, 300, 200, 25);
-        loginPage.add(loginDataError);
-        loginDataError.setVisible(false);
+        loginDataError.setForeground(Color.WHITE);
         loginButton.addActionListener(e -> {
-            String[] data = new String[2];
-            data[0] = loginText.getText();
-            data[1] =  passwordText.getText();
-            userData[0] = data[0];
-            userData[1] = data[1];
-            String[] dataFromFile = FileOperations.readFile(data, saldoAmountText);
+            userData.add(loginText.getText(), 0);
+            userData.add(passwordText.getText(), 1);
             loginDataError.setVisible(true);
+            List dataFromFile = FileOperations.readFile(userData, saldoAmountText);
+            if(userData.getItem(0).equals("") || userData.getItem(1).equals("")){return;}
             if(dataFromFile != null){
-                if (data[0].equals(dataFromFile[0]) && data[1].equals(dataFromFile[1])){
+                if (userData.getItem(0).equals(dataFromFile.getItem(0)) && userData.getItem(1).equals(dataFromFile.getItem(1))){
                     loginPage.setVisible(false);
                     loginDataError.setVisible(false);
                     managePanel.setVisible(true);
+                    refreshMainFrame(mainFrame);
+                    System.out.println(userData.getItem(1));
                 }
             }
         });
-        loginButton.setBounds(100, 200, 200, 25);
-        JButton registerPageButton = new JButton("REGISTER");
-        registerPageButton.setBounds(100, 250, 200, 25);
+        JButton registerPageButton = BetterJFrame.BJButton(100, 250, 200, 25, Color.WHITE, true, loginPage, "REGISTER");
         registerPageButton.addActionListener(e -> {
             loginPage.setVisible(false);
             registerPage.setVisible(true);
             loginDataError.setVisible(false);
         });
-        loginPage.add(loginText);
         loginPage.add(passwordText);
-        loginPage.add(loginButton);
-        loginPage.add(registerPageButton);
-        mainFrame.getContentPane().add(loginPage);
-        mainFrame.getContentPane().add(registerPage);
-        registerPage.setLayout(null);
-        registerPage.setBounds(400, 175, 400, 400);
-        registerPage.setBackground(Color.black);
-        JTextPane loginTextRegister = new JTextPane();
-        loginTextRegister.setBounds(100, 100, 200, 25);
+        JTextField loginTextRegister = BetterJFrame.BJTextField(100, 100, 200, 25, Color.WHITE, true, registerPage, true);
+        loginTextRegister.setToolTipText("Username");
         JPasswordField passwordTextRegister = new JPasswordField();
+        passwordTextRegister.setToolTipText("Password");
         passwordTextRegister.setBounds(100, 150, 200, 25);
-        JButton registerButton = new JButton("REGISTER");
-        registerButton.setBounds(100, 200, 200, 25);
-        JTextPane registerDataError = new JTextPane();
-        registerDataError.setVisible(false);
+        JButton registerButton = BetterJFrame.BJButton(100, 200, 200, 25, Color.WHITE, true, registerPage, "REGISTER");
+        JTextField registerDataError = BetterJFrame.BJTextField(100, 250, 200, 25, darkRed, false, registerPage, false);
         registerDataError.setText("Try Again");
-        registerDataError.setEditable(false);
-        registerDataError.setBackground(Color.red);
-        registerDataError.setBounds(100, 250, 200, 25);
-        registerPage.add(registerDataError);
+        registerDataError.setForeground(Color.WHITE);
         registerButton.addActionListener(e -> {
-            String[] data = new String[2];
-            data[0] = loginTextRegister.getText();
-            data[1] =  passwordTextRegister.getText();
+            List data = new List();
+            data.add(loginTextRegister.getText(), 0);
+            data.add(passwordTextRegister.getText(), 1);
             registerDataError.setVisible(true);
+            if(data.getItem(0).equals("") || data.getItem(0).equals("")){return;}
+            Main.makeSaldo();
             if(FileOperations.createFile(data, true)){
                 registerPage.setVisible(false);
                 loginPage.setVisible(true);
                 registerDataError.setVisible(false);
             }
         });
-        registerPage.add(loginTextRegister);
         registerPage.add(passwordTextRegister);
-        registerPage.add(registerButton);
-
         refreshMainFrame(mainFrame);
         return mainFrame;
     }
     public void createCryptoBlock(double value, String name){
-        JPanel cryptoPanel = new JPanel();
-        cryptoPanel.setBackground(Color.black);
-        cryptoPanel.setLayout(null);
-        cryptoPanel.setPreferredSize(new Dimension(150, 100));
-        JTextArea cryptoText = new JTextArea(name + " : " + String.format("%.5f", value));
-        JButton buyButton = new JButton("BUY");
-        buyButton.setBackground(Color.green);
+        JPanel cryptoPanel = BetterJFrame.BJPanel(0, 0, 150, 100, Color.black, true, null, cryptoInfoPanel);
+        JTextField cryptoText = BetterJFrame.BJTextField(5, 20, 140, 20, Color.white, true, cryptoPanel, false);
+        cryptoText.setText(name + " : " + String.format("%.5f", value));
+        JButton buyButton = BetterJFrame.BJButton(5, 50 , 65, 30, new Color(0, 155, 0), true, cryptoPanel, "BUY");
+        buyButton.setForeground(Color.WHITE);
         buyButton.addActionListener(e -> {
             cryptoInfoScroll.setVisible(false);
-            JPanel buyPanel = new JPanel();
-            buyPanel.setBounds(450, 250, 350, 110);
-            buyPanel.setBackground(Color.BLACK);
-            buyPanel.setLayout(null);
-            buyPanel.setVisible(true);
-            JButton exitButton = new JButton("X");
-            exitButton.setBackground(Color.red);
-            exitButton.setBounds( 280, 5, 45, 45);
+            JPanel buyPanel = BetterJFrame.BJPanel(450, 250, 350, 110, Color.black, true, null, managePanel);
+            JButton exitButton = BetterJFrame.BJButton(280, 10, 45, 45, darkRed, true, buyPanel, "X");
+            exitButton.setForeground(Color.WHITE);
             exitButton.addActionListener(e1 -> {
                 buyPanel.setVisible(false);
                 cryptoInfoScroll.setVisible(true);
             });
-            buyPanel.add(exitButton);
-            refreshMainFrame(mainFrame);
-            JTextField amount = new JTextField();
-
+            JTextField amount = BetterJFrame.BJTextField(190, 10, 80, 50, Color.WHITE, true, buyPanel, true);
             amount.addActionListener(e1 -> {
                 double maxValue = Main.saldoData.get("Money")/value;
                 if (Double.parseDouble(amount.getText()) > maxValue){
@@ -222,33 +177,21 @@ public class UserInterface {
                     }
                 }
             });
-            JButton maxAmount = new JButton("Max");
+            JButton maxAmount = BetterJFrame.BJButton(100, 10, 80, 50, Color.WHITE, true, buyPanel, "Max");
             maxAmount.addActionListener(e1 -> {
                 amount.setText(Double.toString(Main.saldoData.get("Money")/value));
             });
-            JButton confirm = new JButton("Confirm");
-            buyPanel.add(confirm);
-            confirm.setBounds(10, 10, 80, 50);
-            maxAmount.setBounds(100, 10, 80, 50);
-            amount.setBounds(190, 10, 80, 50);
-            JTextArea valueError = new JTextArea("NOT ENOUGH MONEY");
-            valueError.setBounds(150, 70, 120, 50);
-            valueError.setVisible(false);
-            valueError.setBackground(Color.red);
-            valueError.setEditable(false);
-            buyPanel.add(maxAmount);
-            buyPanel.add(amount);
-            buyPanel.add(valueError);
-            managePanel.add(buyPanel);
-            refreshMainFrame(mainFrame);
+            JButton confirm = BetterJFrame.BJButton(10, 10, 80, 50,Color.WHITE, true, buyPanel, "Confirm");
+            JTextField valueError = BetterJFrame.BJTextField(107, 70, 135, 35, darkRed, false, buyPanel, false);
+            valueError.setText("NOT ENOUGH MONEY");
+            valueError.setForeground(Color.WHITE);
             confirm.addActionListener(e2 ->{
                 double maxValue = Main.saldoData.get("Money")/value;
                 try{
                     double inputAmount = Double.parseDouble(amount.getText());
                     if (inputAmount > maxValue){
                         valueError.setVisible(true);
-                        return;
-                    }
+                        return;}
                 }catch(NumberFormatException e3){
                     return;
                 }
@@ -260,7 +203,7 @@ public class UserInterface {
                     }catch(NullPointerException e6){
                         Main.saldoData.put(name, amountDouble);
                     }
-                    Double calculatedMoney = Main.saldoData.get("Money") - amountDouble * value;
+                    double calculatedMoney = Main.saldoData.get("Money") - amountDouble * value;
                     if(calculatedMoney < 0){
                         calculatedMoney = 0.0;}
                     Main.saldoData.put("Money", calculatedMoney);
@@ -272,28 +215,18 @@ public class UserInterface {
                 }
             });
         });
-        buyButton.setBounds(5, 50 , 65, 30);
-        JButton sellButton = new JButton("SELL");
-        sellButton.setBackground(Color.red);
-        sellButton.setBounds(70, 50 , 65, 30);
+        JButton sellButton = BetterJFrame.BJButton(70, 50 , 65, 30, darkRed, true, cryptoPanel, "SELL");
+        sellButton.setForeground(Color.WHITE);
         sellButton.addActionListener(e -> {
             cryptoInfoScroll.setVisible(false);
-            JPanel sellPanel = new JPanel();
-            sellPanel.setBounds(450, 250, 350, 110);
-            sellPanel.setBackground(Color.BLACK);
-            sellPanel.setLayout(null);
-            sellPanel.setVisible(true);
-            JButton exitButton = new JButton("X");
-            exitButton.setBounds( 280, 5, 45, 45);
-            exitButton.setBackground(Color.red);
+            JPanel sellPanel = BetterJFrame.BJPanel(450, 250, 350, 110, Color.black, true, null, managePanel);
+            JButton exitButton = BetterJFrame.BJButton(280, 10, 45, 45, darkRed, true, sellPanel, "X");
+            exitButton.setForeground(Color.WHITE);
             exitButton.addActionListener(e2 -> {
                 sellPanel.setVisible(false);
                 cryptoInfoScroll.setVisible(true);
             });
-            sellPanel.add(exitButton);
-            refreshMainFrame(mainFrame);
-            JTextField amount = new JTextField();
-
+            JTextField amount = BetterJFrame.BJTextField(190, 10, 80, 50, Color.WHITE, true, sellPanel, true);
             amount.addActionListener(e1 -> {
                 double maxValue = Main.saldoData.get(name);
                 if (Double.parseDouble(amount.getText()) > maxValue){
@@ -308,25 +241,14 @@ public class UserInterface {
                     }
                 }
             });
-            JButton maxAmount = new JButton("Max");
+            JButton maxAmount = BetterJFrame.BJButton(100, 10, 80, 50, Color.WHITE, true, sellPanel, "Max");
             maxAmount.addActionListener(e1 -> {
                 amount.setText(Double.toString(Main.saldoData.get(name)));
             });
-            JButton confirm = new JButton("Confirm");
-            sellPanel.add(confirm);
-            confirm.setBounds(10, 10, 80, 50);
-            maxAmount.setBounds(100, 10, 80, 50);
-            amount.setBounds(190, 10, 80, 50);
-            JTextArea valueError = new JTextArea("DATA ERROR");
-            valueError.setBounds(150, 70, 120, 50);
-            valueError.setVisible(false);
-            valueError.setBackground(Color.red);
-            valueError.setEditable(false);
-            sellPanel.add(maxAmount);
-            sellPanel.add(amount);
-            sellPanel.add(valueError);
-            managePanel.add(sellPanel);
-            refreshMainFrame(mainFrame);
+            JButton confirm = BetterJFrame.BJButton(10, 10, 80, 50,Color.WHITE, true, sellPanel, "Confirm");
+            JTextField valueError = BetterJFrame.BJTextField(110, 70, 140, 35, darkRed, false, sellPanel, false);
+            valueError.setText("NOT ENOUGH CRYPTO");
+            valueError.setForeground(Color.WHITE);
             confirm.addActionListener(e2 ->{
                 double maxValue = Main.saldoData.get(name);
                 try{
@@ -349,23 +271,12 @@ public class UserInterface {
                     cryptoInfoScroll.setVisible(true);
                     amount.setText("");
                 }
-
             });
-
         });
-        cryptoText.setBounds(10, 20, 100, 20);
-        cryptoPanel.add(buyButton);
-        cryptoPanel.add(sellButton);
-        cryptoPanel.add(cryptoText);
-        cryptoPanel.setVisible(true);
-        cryptoInfoPanel.add(cryptoPanel);
         refreshMainFrame(mainFrame);
     }
-
-
     public static void refreshMainFrame(JFrame frame){
         frame.revalidate();
         frame.repaint();
     }
-
 }

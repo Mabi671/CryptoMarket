@@ -26,6 +26,10 @@ public class Main {
             "EGLD", "AR", "RNDR", "LTO", "YGG"
     };
     public static void main(String[] args) {
+        Main.ui = new UserInterface();
+        mainFrame = Main.ui.makeUserInterface();
+    }
+    public static void makeSaldo(){
         saldoData.put("Money", 100.0);
         for(String symbol : symbols){
             if(symbol.equals("USDT")){
@@ -34,8 +38,6 @@ public class Main {
                 saldoData.put(symbol, 0.0);
             }
         }
-        Main.ui = new UserInterface();
-        mainFrame = Main.ui.makeUserInterface();
     }
     public  void getData() throws InterruptedException {
         int length = symbols.length;
@@ -50,7 +52,8 @@ public class Main {
                 }
             }
         }
-        TimeUnit.SECONDS.sleep(3);
+        TimeUnit.SECONDS.sleep(5);
+
         UserInterface.refreshMainFrame(mainFrame);
     }
 }

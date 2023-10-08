@@ -1,12 +1,14 @@
 package org.example;
 import javax.swing.*;
+import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.Map;
+
 
 public class FileOperations {
     public static String reservedCharsRegex = "[<>\":/\\\\|?*]";
-    public static boolean createFile(String[] data, boolean create){
-        String fileNameforWin = data[0].replaceAll(reservedCharsRegex, "") + "File.txt";
+    public static boolean createFile(List data, boolean create){
+        String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
         fileNameforWin = fileNameforWin.replaceAll("\t", "");
         File test = new File(fileNameforWin);
         if(test.exists() && create){
@@ -20,15 +22,15 @@ public class FileOperations {
             return false;
         }
     }
-    public static String[] readFile(String[] data, JTextArea saldoText){
-        String fileNameforWin = data[0].replaceAll(reservedCharsRegex, "") + "File.txt";
+    public static List readFile(List data, JTextField saldoText){
+        String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
         fileNameforWin = fileNameforWin.replaceAll("\t", "");
         File test = new File(fileNameforWin);
         if(!test.exists()){
             return null;
         }
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileNameforWin))) {
-            String[] readArray = (String[]) in.readObject();
+            List readArray = (List) in.readObject();
             Map<String, Double> readDataMap = (Map<String, Double>) in.readObject();
             for (String key : readDataMap.keySet()) {
                 Main.saldoData.put(key, readDataMap.get(key));
