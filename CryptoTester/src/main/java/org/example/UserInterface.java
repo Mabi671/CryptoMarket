@@ -135,7 +135,7 @@ public class UserInterface {
             data.add(loginTextRegister.getText(), 0);
             data.add(passwordTextRegister.getText(), 1);
             registerDataError.setVisible(true);
-            if(data.getItem(0).equals("") || data.getItem(0).equals("")){return;}
+            if(data.getItem(0).equals("") || data.getItem(1).equals("")){return;}
             Main.makeSaldo();
             if(FileOperations.createFile(data, true)){
                 registerPage.setVisible(false);
