@@ -18,7 +18,7 @@ public class DownloadingData extends Thread{
         this.symbol = symbol;
     }
     public void run() {
-        String apiKey = "64edeb54bab1e50001b7e0b8";
+        String apiKey = "skrrtprrrt";
         String baseUrl = "https://api.kucoin.com";
         Map<String, Integer> hashMap = new HashMap<>();
         String endpoint = "/api/v1/mark-price/" + symbol +"-BTC" + "/current";
