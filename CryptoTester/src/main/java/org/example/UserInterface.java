@@ -1,10 +1,14 @@
 package org.example;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.List;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserInterface {
     private final Color darkRed = new Color(150, 0, 0);
@@ -15,7 +19,8 @@ public class UserInterface {
     protected JTextField saldoAmountText = BetterJFrame.BJTextField(300, 50, 215, 30, darkRed, true, managePanel, false);
     public List userData = new List();
     private final JPanel saldoPanel = BetterJFrame.BJPanel(0, 200, 1200, 800, Color.blue, false, new FlowLayout(), managePanel);
-    protected JFrame makeUserInterface() {
+    public  Map<String, Double> fajnie = new HashMap<>();
+    public JFrame makeUserInterface() {
         JPanel registerPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.BLACK, false, null, mainFrame);
         JPanel loginPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.black,true, null, mainFrame);
         cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
@@ -26,6 +31,53 @@ public class UserInterface {
         cryptoInfoScroll.setBackground(Color.BLUE);
         cryptoInfoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         cryptoInfoScroll.getVerticalScrollBar().setUnitIncrement(20);
+        JButton sortAsc = BetterJFrame.BJButton(50, 100, 200, 25, darkRed, false, managePanel, "HIGHEST");
+        sortAsc.setForeground(Color.WHITE);
+        sortAsc.addActionListener(e -> {
+            cryptoInfoPanel.removeAll();
+            double bitcoinPrice = Main.prices.get("USDT");
+            LinkedHashMap<String, Double> sortedMap = Main.prices.entrySet()
+                    .stream()
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                if(key.equals("USDT")){
+                    createCryptoBlock(bitcoinPrice, "BTC");
+                }else{
+                    value *= bitcoinPrice;
+                    createCryptoBlock(value, key);
+                }
+            }
+        });
+        JButton sortDesc = BetterJFrame.BJButton(50, 125, 200, 25, darkRed, false, managePanel, "LOWEST");
+        sortDesc.addActionListener(e -> {
+            cryptoInfoPanel.removeAll();
+            double bitcoinPrice = Main.prices.get("USDT");
+            LinkedHashMap<String, Double> sortedMap = Main.prices.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                if(key.equals("USDT")){
+                    createCryptoBlock(bitcoinPrice, "BTC");
+                }else{
+                    value *= bitcoinPrice;
+                    createCryptoBlock(value, key);
+                }
+            }
+        });
+
+        sortDesc.setForeground(Color.WHITE);
         JButton trade = BetterJFrame.BJButton(50, 50, 200, 50, darkRed, true, managePanel, "GET PRICES");
         trade.setForeground(Color.WHITE);
         trade.addActionListener(e -> {
@@ -36,14 +88,16 @@ public class UserInterface {
                 cryptoInfoScroll.setVisible(true);
                 saldoPanel.setVisible(false);
                 managePanel.add(cryptoInfoScroll);
+                sortAsc.setVisible(true);
+                sortDesc.setVisible(true);
                 Main main = new Main();
                 main.getData();
-                double bitcoinPrice = 0;
+                double bitcoinPrice = 1/Main.prices.get("USDT");
+                Main.prices.put("USDT", bitcoinPrice);
                 for (Map.Entry<String, Double> entry : Main.prices.entrySet()) {
                     String key = entry.getKey();
                     Double value = entry.getValue();
                     if(key.equals("USDT")){
-                        bitcoinPrice = 1/value;
                         createCryptoBlock(bitcoinPrice, "BTC");
                     }else{
                         value *= bitcoinPrice;
@@ -63,12 +117,16 @@ public class UserInterface {
             cryptoInfoPanel.removeAll();
             cryptoInfoPanel.setVisible(false);
             cryptoInfoScroll.setVisible(false);
+            sortAsc.setVisible(false);
+            sortDesc.setVisible(false);
             saldoPanel.setVisible(false);
         });
         JButton currSaldo = BetterJFrame.BJButton(600, 50, 200, 50, darkRed, true, managePanel, "YOUR CRYPTOS");
         currSaldo.setForeground(Color.WHITE);
         currSaldo.addActionListener(e ->{
             cryptoInfoScroll.setVisible(false);
+            sortAsc.setVisible(false);
+            sortDesc.setVisible(false);
             cryptoInfoPanel.removeAll();
             saldoPanel.setVisible(true);
             for (Map.Entry<String, Double> entry : Main.saldoData.entrySet()){
@@ -82,6 +140,7 @@ public class UserInterface {
                 JTextField textSaldo = new JTextField();
                 textSaldo.setBounds(5, 5, 140, 40);
                 textSaldo.setText(key + ": " + String.format("%.5f", value));
+                textSaldo.setEditable(false);
                 saldoInfoPanel.add(textSaldo);
                 saldoPanel.add(saldoInfoPanel);
             }
