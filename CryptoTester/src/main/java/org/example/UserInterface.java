@@ -16,14 +16,12 @@ public class UserInterface {
     private final JPanel managePanel = BetterJFrame.BJPanel(0, 0, 1200, 800, new Color(0, 155, 0), false, null, mainFrame);
     private final JPanel cryptoInfoPanel = new JPanel();
     private final JScrollPane cryptoInfoScroll = new JScrollPane(cryptoInfoPanel);
-    protected JTextField saldoAmountText = BetterJFrame.BJTextField(300, 50, 215, 30, darkRed, true, managePanel, false);
+    protected JTextField saldoAmountText = BetterJFrame.BJTextField(300, 10, 215, 30, darkRed, true, managePanel, false);
     public List userData = new List();
     private final JPanel saldoPanel = BetterJFrame.BJPanel(0, 200, 1200, 800, Color.blue, false, new FlowLayout(), managePanel);
-    public  Map<String, Double> fajnie = new HashMap<>();
     public JFrame makeUserInterface() {
         JPanel registerPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.BLACK, false, null, mainFrame);
         JPanel loginPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.black,true, null, mainFrame);
-        cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
         cryptoInfoPanel.setLayout(new FlowLayout());
         cryptoInfoPanel.setBackground(Color.BLUE);
         cryptoInfoScroll.setBounds(0, 200, 1185, 800);
@@ -52,6 +50,40 @@ public class UserInterface {
                     value *= bitcoinPrice;
                     createCryptoBlock(value, key);
                 }
+            }
+        });
+        JButton sortAscStocks = BetterJFrame.BJButton(260, 100, 200, 25, darkRed, false, managePanel, "HIGHEST");
+        sortAscStocks.setForeground(Color.WHITE);
+        sortAscStocks.addActionListener(e -> {
+            cryptoInfoPanel.removeAll();
+            LinkedHashMap<String, Double> sortedMap = Main.stockPrices.entrySet()
+                    .stream()
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                createCryptoBlock(value, key);
+            }
+        });
+        JButton sortDescStocks = BetterJFrame.BJButton(260, 125, 200, 25, darkRed, false, managePanel, "LOWEST");
+        sortDescStocks.setForeground(Color.WHITE);
+        sortDescStocks.addActionListener(e1 -> {
+            cryptoInfoPanel.removeAll();
+            LinkedHashMap<String, Double> sortedMap = Main.stockPrices.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                createCryptoBlock(value, key);
             }
         });
         JButton sortDesc = BetterJFrame.BJButton(50, 125, 200, 25, darkRed, false, managePanel, "LOWEST");
@@ -88,8 +120,11 @@ public class UserInterface {
                 cryptoInfoScroll.setVisible(true);
                 saldoPanel.setVisible(false);
                 managePanel.add(cryptoInfoScroll);
+                cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
                 sortAsc.setVisible(true);
                 sortDesc.setVisible(true);
+                sortAscStocks.setVisible(false);
+                sortDescStocks.setVisible(false);
                 Main main = new Main();
                 main.getData();
                 double bitcoinPrice = 1/Main.prices.get("USDT");
@@ -108,6 +143,35 @@ public class UserInterface {
                 throw new RuntimeException(ex);
             }
         });
+        JButton stockPrices = BetterJFrame.BJButton(260, 50, 200, 50, darkRed, true, managePanel, "GET STOCKS");
+        stockPrices.setForeground(Color.WHITE);
+        stockPrices.addActionListener(e -> {
+            try{
+                saldoPanel.removeAll();
+                cryptoInfoPanel.removeAll();
+                cryptoInfoPanel.setVisible(true);
+                cryptoInfoScroll.setVisible(true);
+                saldoPanel.setVisible(false);
+                managePanel.add(cryptoInfoScroll);
+                cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
+                sortAsc.setVisible(false);
+                sortDesc.setVisible(false);
+                sortAscStocks.setVisible(true);
+                sortDescStocks.setVisible(true);
+                Main main = new Main();
+                main.getStocks();
+                for (Map.Entry<String, Double> entry : Main.stockPrices.entrySet()) {
+                    String key = entry.getKey();
+                    Double value = entry.getValue();
+                    createCryptoBlock(value, key);
+                }
+            }catch(ConcurrentModificationException ex){
+                System.out.println(ex.getMessage());
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+
+        });
         JButton logOut = BetterJFrame.BJButton(900, 50, 200, 50, Color.darkGray, true, managePanel, "LOGOUT");
         logOut.setForeground(Color.WHITE);
         logOut.addActionListener(e -> {
@@ -119,14 +183,18 @@ public class UserInterface {
             cryptoInfoScroll.setVisible(false);
             sortAsc.setVisible(false);
             sortDesc.setVisible(false);
+            sortAscStocks.setVisible(false);
+            sortDescStocks.setVisible(false);
             saldoPanel.setVisible(false);
         });
-        JButton currSaldo = BetterJFrame.BJButton(600, 50, 200, 50, darkRed, true, managePanel, "YOUR CRYPTOS");
+        JButton currSaldo = BetterJFrame.BJButton(600, 50, 200, 50, darkRed, true, managePanel, "YOUR ASSETS");
         currSaldo.setForeground(Color.WHITE);
         currSaldo.addActionListener(e ->{
             cryptoInfoScroll.setVisible(false);
             sortAsc.setVisible(false);
             sortDesc.setVisible(false);
+            sortAscStocks.setVisible(false);
+            sortDescStocks.setVisible(false);
             cryptoInfoPanel.removeAll();
             saldoPanel.setVisible(true);
             for (Map.Entry<String, Double> entry : Main.saldoData.entrySet()){
