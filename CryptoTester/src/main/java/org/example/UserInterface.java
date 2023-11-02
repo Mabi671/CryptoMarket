@@ -16,9 +16,14 @@ public class UserInterface {
     private final JPanel managePanel = BetterJFrame.BJPanel(0, 0, 1200, 800, new Color(0, 155, 0), false, null, mainFrame);
     private final JPanel cryptoInfoPanel = new JPanel();
     private final JScrollPane cryptoInfoScroll = new JScrollPane(cryptoInfoPanel);
-    protected JTextField saldoAmountText = BetterJFrame.BJTextField(300, 10, 215, 30, darkRed, true, managePanel, false);
     public List userData = new List();
     private final JPanel saldoPanel = BetterJFrame.BJPanel(0, 200, 1200, 800, Color.blue, false, new FlowLayout(), managePanel);
+    protected JTextField saldoAmountText = BetterJFrame.BJTextField(600, 100, 300, 100, darkRed, false, managePanel, false);
+    private final JButton sortAsc = BetterJFrame.BJButton(0, 100, 300, 50, darkRed, false, managePanel, "HIGHEST");
+    private final JButton sortDesc = BetterJFrame.BJButton(0, 150, 300, 50, darkRed, false, managePanel, "LOWEST");
+    private final JButton sortAscStocks = BetterJFrame.BJButton(300, 100, 300, 50, darkRed, false, managePanel, "HIGHEST");
+    private final JButton sortDescStocks = BetterJFrame.BJButton(300, 150, 300, 50, darkRed, false, managePanel, "LOWEST");
+    private final JButton downloadButton = BetterJFrame.BJButton(900, 100, 300, 100, darkRed, false, managePanel, "LOAD PRICES");
     public JFrame makeUserInterface() {
         JPanel registerPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.BLACK, false, null, mainFrame);
         JPanel loginPage = BetterJFrame.BJPanel(400, 175, 400, 400, Color.black,true, null, mainFrame);
@@ -29,11 +34,10 @@ public class UserInterface {
         cryptoInfoScroll.setBackground(Color.BLUE);
         cryptoInfoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         cryptoInfoScroll.getVerticalScrollBar().setUnitIncrement(20);
-        JButton sortAsc = BetterJFrame.BJButton(50, 100, 200, 25, darkRed, false, managePanel, "HIGHEST");
         sortAsc.setForeground(Color.WHITE);
+        sortAsc.setFont(new Font("Arial Bold", Font.PLAIN, 18 ));
         sortAsc.addActionListener(e -> {
             cryptoInfoPanel.removeAll();
-            double bitcoinPrice = Main.prices.get("USDT");
             LinkedHashMap<String, Double> sortedMap = Main.prices.entrySet()
                     .stream()
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
@@ -41,18 +45,22 @@ public class UserInterface {
                             Map.Entry::getKey,
                             Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                if(key.equals("USDT")){
-                    createCryptoBlock(bitcoinPrice, "BTC");
-                }else{
-                    value *= bitcoinPrice;
-                    createCryptoBlock(value, key);
-                }
-            }
+            creatingBlocks(sortedMap, "Crypto", 2);
         });
-        JButton sortAscStocks = BetterJFrame.BJButton(260, 100, 200, 25, darkRed, false, managePanel, "HIGHEST");
+        sortDesc.setFont(new Font("Arial Bold", Font.PLAIN, 18 ));
+        sortDesc.addActionListener(e -> {
+            cryptoInfoPanel.removeAll();
+            LinkedHashMap<String, Double> sortedMap = Main.prices.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            creatingBlocks(sortedMap, "Crypto", 1);
+        });
+        sortDesc.setForeground(Color.WHITE);
+        sortAscStocks.setFont(new Font("Arial Bold", Font.PLAIN, 18 ));
         sortAscStocks.setForeground(Color.WHITE);
         sortAscStocks.addActionListener(e -> {
             cryptoInfoPanel.removeAll();
@@ -63,14 +71,10 @@ public class UserInterface {
                             Map.Entry::getKey,
                             Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                createCryptoBlock(value, key);
-            }
+            creatingBlocks(sortedMap, "Stock", 2);
         });
-        JButton sortDescStocks = BetterJFrame.BJButton(260, 125, 200, 25, darkRed, false, managePanel, "LOWEST");
         sortDescStocks.setForeground(Color.WHITE);
+        sortDescStocks.setFont(new Font("Arial Bold", Font.PLAIN, 18 ));
         sortDescStocks.addActionListener(e1 -> {
             cryptoInfoPanel.removeAll();
             LinkedHashMap<String, Double> sortedMap = Main.stockPrices.entrySet()
@@ -80,100 +84,74 @@ public class UserInterface {
                             Map.Entry::getKey,
                             Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                createCryptoBlock(value, key);
-            }
+            creatingBlocks(sortedMap, "Stock", 1);
         });
-        JButton sortDesc = BetterJFrame.BJButton(50, 125, 200, 25, darkRed, false, managePanel, "LOWEST");
-        sortDesc.addActionListener(e -> {
+        downloadButton.setForeground(Color.white);
+        downloadButton.setFont(new Font("Arial Bold", Font.PLAIN, 26 ));
+        downloadButton.addActionListener(e -> {
+            saldoPanel.removeAll();
             cryptoInfoPanel.removeAll();
-            double bitcoinPrice = Main.prices.get("USDT");
-            LinkedHashMap<String, Double> sortedMap = Main.prices.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue())
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                if(key.equals("USDT")){
-                    createCryptoBlock(bitcoinPrice, "BTC");
-                }else{
-                    value *= bitcoinPrice;
-                    createCryptoBlock(value, key);
-                }
-            }
-        });
-
-        sortDesc.setForeground(Color.WHITE);
-        JButton trade = BetterJFrame.BJButton(50, 50, 200, 50, darkRed, true, managePanel, "GET PRICES");
-        trade.setForeground(Color.WHITE);
-        trade.addActionListener(e -> {
+            cryptoInfoPanel.setVisible(true);
+            cryptoInfoScroll.setVisible(true);
+            saldoPanel.setVisible(false);
+            saldoAmountText.setVisible(false);
+            managePanel.add(cryptoInfoScroll);
             try {
-                saldoPanel.removeAll();
-                cryptoInfoPanel.removeAll();
-                cryptoInfoPanel.setVisible(true);
-                cryptoInfoScroll.setVisible(true);
-                saldoPanel.setVisible(false);
-                managePanel.add(cryptoInfoScroll);
-                cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
-                sortAsc.setVisible(true);
-                sortDesc.setVisible(true);
-                sortAscStocks.setVisible(false);
-                sortDescStocks.setVisible(false);
-                Main main = new Main();
-                main.getData();
-                double bitcoinPrice = 1/Main.prices.get("USDT");
-                Main.prices.put("USDT", bitcoinPrice);
-                for (Map.Entry<String, Double> entry : Main.prices.entrySet()) {
-                    String key = entry.getKey();
-                    Double value = entry.getValue();
-                    if(key.equals("USDT")){
-                        createCryptoBlock(bitcoinPrice, "BTC");
-                    }else{
-                        value *= bitcoinPrice;
-                        createCryptoBlock(value, key);
-                    }
+                if (sortAsc.isVisible()) {
+                    cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
+                    sortingSwitch("Crypto");
+                    Main main = new Main();
+                    main.getData();
+                    Main.prices.put("USDT", 1/Main.prices.get("USDT"));
+                    creatingBlocks(Main.prices, "kot12", 2231);
                 }
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        JButton stockPrices = BetterJFrame.BJButton(260, 50, 200, 50, darkRed, true, managePanel, "GET STOCKS");
-        stockPrices.setForeground(Color.WHITE);
-        stockPrices.addActionListener(e -> {
-            try{
-                saldoPanel.removeAll();
-                cryptoInfoPanel.removeAll();
-                cryptoInfoPanel.setVisible(true);
-                cryptoInfoScroll.setVisible(true);
-                saldoPanel.setVisible(false);
-                managePanel.add(cryptoInfoScroll);
-                cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
-                sortAsc.setVisible(false);
-                sortDesc.setVisible(false);
-                sortAscStocks.setVisible(true);
-                sortDescStocks.setVisible(true);
-                Main main = new Main();
-                main.getStocks();
-                for (Map.Entry<String, Double> entry : Main.stockPrices.entrySet()) {
-                    String key = entry.getKey();
-                    Double value = entry.getValue();
-                    createCryptoBlock(value, key);
+                else{
+                    cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
+                    sortingSwitch("Stock");
+                    Main main = new Main();
+                    main.getStocks();
+                    creatingBlocks(Main.stockPrices, "Stock", 213);
                 }
             }catch(ConcurrentModificationException ex){
                 System.out.println(ex.getMessage());
-            } catch (InterruptedException ex) {
+            }
+            catch(InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
-
         });
-        JButton logOut = BetterJFrame.BJButton(900, 50, 200, 50, Color.darkGray, true, managePanel, "LOGOUT");
+        JButton trade = BetterJFrame.BJButton(0, 0, 300, 100, Color.BLACK, true, managePanel, "CRYPTOCURRENCIES");
+        trade.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
+        trade.setForeground(Color.WHITE);
+        trade.addActionListener(e -> {
+            saldoPanel.removeAll();
+            cryptoInfoPanel.removeAll();
+            cryptoInfoPanel.setVisible(true);
+            cryptoInfoScroll.setVisible(true);
+            saldoPanel.setVisible(false);
+            saldoAmountText.setVisible(false);
+            managePanel.add(cryptoInfoScroll);
+            cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
+            sortingSwitch("Crypto");
+            creatingBlocks(Main.prices, "kot12", 2231);
+        });
+        JButton stockPrices = BetterJFrame.BJButton(300, 0, 300, 100, Color.BLACK, true, managePanel, "STOCK MARKET");
+        stockPrices.setForeground(Color.WHITE);
+        stockPrices.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
+        stockPrices.addActionListener(e -> {
+            saldoPanel.removeAll();
+            cryptoInfoPanel.removeAll();
+            cryptoInfoPanel.setVisible(true);
+            cryptoInfoScroll.setVisible(true);
+            saldoPanel.setVisible(false);
+            saldoAmountText.setVisible(false);
+            managePanel.add(cryptoInfoScroll);
+            cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
+            sortingSwitch("Stock");
+            creatingBlocks(Main.stockPrices, "Stock", 213);
+        });
+        JButton logOut = BetterJFrame.BJButton(900, 0, 300, 100, Color.BLACK, true, managePanel, "LOGOUT");
         logOut.setForeground(Color.WHITE);
+        logOut.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
         logOut.addActionListener(e -> {
             loginPage.setVisible(true);
             managePanel.setVisible(false);
@@ -181,22 +159,19 @@ public class UserInterface {
             cryptoInfoPanel.removeAll();
             cryptoInfoPanel.setVisible(false);
             cryptoInfoScroll.setVisible(false);
-            sortAsc.setVisible(false);
-            sortDesc.setVisible(false);
-            sortAscStocks.setVisible(false);
-            sortDescStocks.setVisible(false);
+            sortingSwitch("fries maker");
             saldoPanel.setVisible(false);
+            saldoAmountText.setVisible(false);
         });
-        JButton currSaldo = BetterJFrame.BJButton(600, 50, 200, 50, darkRed, true, managePanel, "YOUR ASSETS");
+        JButton currSaldo = BetterJFrame.BJButton(600, 0, 300, 100, Color.BLACK, true, managePanel, "YOUR ASSETS");
+        currSaldo.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
         currSaldo.setForeground(Color.WHITE);
         currSaldo.addActionListener(e ->{
             cryptoInfoScroll.setVisible(false);
-            sortAsc.setVisible(false);
-            sortDesc.setVisible(false);
-            sortAscStocks.setVisible(false);
-            sortDescStocks.setVisible(false);
+            sortingSwitch("fries maker");
             cryptoInfoPanel.removeAll();
             saldoPanel.setVisible(true);
+            saldoAmountText.setVisible(true);
             for (Map.Entry<String, Double> entry : Main.saldoData.entrySet()){
                 String key = entry.getKey();
                 Double value = entry.getValue();
@@ -401,6 +376,76 @@ public class UserInterface {
             });
         });
         refreshMainFrame(mainFrame);
+    }
+    // any normal, 1 desc, 2 asc
+    private void creatingBlocks(Map<String, Double> map, String type, int sort){
+        LinkedHashMap<String, Double> sortedMap;
+        if(sort == 1){
+            sortedMap = map.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        }else if(sort == 2){
+            sortedMap = map.entrySet()
+                    .stream()
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        }else{
+            sortedMap = map.entrySet()
+                    .stream().collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+        }
+        if(type.equals("Stock")){
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                createCryptoBlock(value, key);
+            }
+        }else{
+            double bitcoinPrice = Main.prices.get("USDT");
+            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                if(key.equals("USDT")){
+                    createCryptoBlock(bitcoinPrice, "BTC");
+                }else{
+                    value *= bitcoinPrice;
+                    createCryptoBlock(value, key);
+                }
+            }
+        }
+    }
+    private void sortingSwitch(String type)
+    {
+        if(type.equals("Stock"))
+        {
+            sortAsc.setVisible(false);
+            sortDesc.setVisible(false);
+            sortAscStocks.setVisible(true);
+            sortDescStocks.setVisible(true);
+            downloadButton.setVisible(true);
+        }else if (type.equals("Crypto")){
+            sortAsc.setVisible(true);
+            sortDesc.setVisible(true);
+            sortAscStocks.setVisible(false);
+            sortDescStocks.setVisible(false);
+            downloadButton.setVisible(true);
+        }else{
+            sortAsc.setVisible(false);
+            sortDesc.setVisible(false);
+            sortAscStocks.setVisible(false);
+            sortDescStocks.setVisible(false);
+            downloadButton.setVisible(false);
+        }
     }
     public static void refreshMainFrame(JFrame frame){
         frame.revalidate();
