@@ -16,7 +16,7 @@ public class StockData extends Thread {
     }
     public void run(){
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"kot";
+            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"kooooooooooooooooot";
             HttpGet request = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 if (response.getStatusLine().getStatusCode() == 200) {

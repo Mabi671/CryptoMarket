@@ -1,5 +1,4 @@
 package org.example;
-import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +7,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UserInterface {
     private final Color darkRed = new Color(150, 0, 0);
@@ -377,33 +375,27 @@ public class UserInterface {
         });
         refreshMainFrame(mainFrame);
     }
+    private Comparator<? super Map.Entry<String, Double>> selectSort(int sort)
+    {
+        if(sort == 1){
+            return Map.Entry.comparingByValue();
+        }else if(sort == 2){
+            return Collections.reverseOrder(Map.Entry.comparingByValue());
+        }else{
+            return Comparator.comparing(e -> 0);
+        }
+
+    }
     // any normal, 1 desc, 2 asc
     private void creatingBlocks(Map<String, Double> map, String type, int sort){
         LinkedHashMap<String, Double> sortedMap;
-        if(sort == 1){
-            sortedMap = map.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue())
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-        }else if(sort == 2){
-            sortedMap = map.entrySet()
-                    .stream()
-                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-        }else{
-            sortedMap = map.entrySet()
-                    .stream().collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-
-        }
+        sortedMap = map.entrySet()
+                .stream()
+                .sorted(selectSort(sort))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         if(type.equals("Stock")){
             for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
                 String key = entry.getKey();
