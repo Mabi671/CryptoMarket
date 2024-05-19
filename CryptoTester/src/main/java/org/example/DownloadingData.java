@@ -1,10 +1,8 @@
 package org.example;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -12,11 +10,6 @@ import org.apache.http.util.EntityUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.util.HashMap;
-import java.util.Map;
 public class DownloadingData extends Thread{
     private final String symbol;
     DownloadingData(String symbol){
@@ -25,7 +18,6 @@ public class DownloadingData extends Thread{
     public void run() {
         String apiKey = "skrrtprrrt";
         String baseUrl = "https://api.kucoin.com";
-        Map<String, Integer> hashMap = new HashMap<>();
         String endpoint = "/api/v1/mark-price/" + symbol +"-BTC" + "/current";
         String url = baseUrl + endpoint;
         try {

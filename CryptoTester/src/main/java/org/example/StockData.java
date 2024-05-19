@@ -16,7 +16,7 @@ public class StockData extends Thread {
     }
     public void run(){
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"kooooooooooooooooot";
+            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"kulowierca";
             HttpGet request = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
@@ -27,6 +27,7 @@ public class StockData extends Thread {
                         try{
                             double value = jsonObject.get("c").getAsDouble();
                             Main.stockPrices.put(symbol, value);
+                            System.out.println(symbol);
                         }catch(NullPointerException e){
                             System.out.println(symbol);
                         }

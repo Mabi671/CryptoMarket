@@ -3,7 +3,8 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 public class Main {
     public static Map<String, Double> prices = new HashMap<>();
     public static Map<String, Double> stockPrices = new HashMap<>();
@@ -50,7 +51,7 @@ public class Main {
                 }
             }
         }
-        TimeUnit.SECONDS.sleep(5);
+        getTime("stocks");
 
     }
     public static void makeSaldo(){
@@ -79,8 +80,16 @@ public class Main {
                 }
             }
         }
+        getTime("crypto");
+        prices.put("USDT", 1/prices.get("USDT"));
+    }
+    private void getTime(String type) throws InterruptedException {
         TimeUnit.SECONDS.sleep(5);
-
-        UserInterface.refreshMainFrame(mainFrame);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = currentDateTime.format(formatter);
+        FileOperations.createFolder(type+"HistoryData");
+        FileOperations.createFile(type.equals("crypto") ? prices : stockPrices, formattedDateTime, type);
+        System.out.println(type.equals("crypto") ? prices : stockPrices);
     }
 }

@@ -35,13 +35,15 @@ public class BetterJFrame{
         parent.add(panel);
         return panel;
     }
-    public static JTextField BJTextField(int x, int y, int width, int height, Color color, boolean visibility, JPanel parent, boolean editable){
+    public static JTextField BJTextField(int x, int y, int width, int height, Color color, boolean visibility, JPanel parent, boolean editable, String setText, Color foregroundColor){
         JTextField textField = new JTextField();
         textField.setBounds(x, y, width, height);
         textField.setPreferredSize(new Dimension(width, height));
         textField.setBackground(color);
         textField.setVisible(visibility);
         textField.setEditable(editable);
+        textField.setText(setText);
+        textField.setForeground(foregroundColor);
         parent.add(textField);
         return textField;
     }

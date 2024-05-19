@@ -1,12 +1,27 @@
 package org.example;
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.Map;
-
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 public class FileOperations {
     public static String reservedCharsRegex = "[<>\":/\\\\|?*]";
+    public static void createFolder(String folderName){
+        Path newFolderPath = Paths.get(folderName);
+        try {
+            Files.createDirectories(newFolderPath);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public static File[] getAllFiles(String type)
+    {
+            File folder = new File(type+"HistoryData/");
+            return folder.listFiles();
+
+    }
+
     public static boolean createFile(List data, boolean create){
         String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
         fileNameforWin = fileNameforWin.replaceAll("\t", "");
@@ -22,7 +37,20 @@ public class FileOperations {
             return false;
         }
     }
-    public static List readFile(List data, JTextField saldoText){
+    public static void createFile(Map<String, Double> data,  String name, String type){
+        String fileNameforWin = type+"HistoryData/" + name + ".txt";
+        fileNameforWin = fileNameforWin.replaceAll(":", "_");
+        if(type.equals("crypto"))
+        {
+            data.put("USDT", 1/data.get("USDT"));
+        }
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameforWin))) {
+            out.writeObject(data);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public static List readFile(List data){
         String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
         fileNameforWin = fileNameforWin.replaceAll("\t", "");
         File test = new File(fileNameforWin);
@@ -35,14 +63,17 @@ public class FileOperations {
             for (String key : readDataMap.keySet()) {
                 Main.saldoData.put(key, readDataMap.get(key));
             }
-            saldoText.setText("Money: " + String.format("%.5f", readDataMap.get("Money")));
             return readArray;
         } catch (IOException | ClassNotFoundException e) {
             return null;
+     }
     }
-
-
-
-
-}}
+    public static Map<String, Double> readFile(String fileName){
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName))) {
+            return (Map<String, Double>) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+}
+}
 
