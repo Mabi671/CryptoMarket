@@ -16,9 +16,12 @@ public class StockData extends Thread {
     }
     public void run(){
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"kulowierca";
+            String url = "https://finnhub.io/api/v1/quote?symbol="+symbol+"___";
             HttpGet request = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
+                if(response.getStatusLine().getStatusCode() == 401){
+                    Main.stockPrices.put("failed", 5.0);
+                }
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();
                     if (entity != null) {
@@ -29,14 +32,13 @@ public class StockData extends Thread {
                             Main.stockPrices.put(symbol, value);
                             System.out.println(symbol);
                         }catch(NullPointerException e){
-                            System.out.println(symbol);
+                            e.getMessage();
                         }
                     }
                 } else {
                     System.out.println("Error: " + response.getStatusLine().getStatusCode());
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

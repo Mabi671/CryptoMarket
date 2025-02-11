@@ -1,5 +1,9 @@
 package org.example;
+import jdk.jfr.Frequency;
+
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.List;
 import java.awt.event.*;
@@ -7,147 +11,138 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 public class UserInterface {
     private final Color darkRed = new Color(150, 0, 0);
+    private final Color darkGreen = new Color(0, 128, 0);
+    private final Color grey = new Color(52, 52, 52);
+    private final Color lightBlack = new Color(135, 200, 160, 125);
+    private final Color redBlack = new Color(55, 22, 22);
     private final JFrame mainFrame = BetterJFrame.BJFrame(1200, 800, Color.BLACK,true,null);
-    private final JPanel managePanel = BetterJFrame.BJPanel(0, 0, 1200, 800, new Color(0, 0, 0), false, null, mainFrame);
+    private final JPanel managePanel = BetterJFrame.BJPanel(0, 0, 1200, 800, grey, false,null, mainFrame);
     private final JPanel cryptoInfoPanel = new JPanel();
     private final JScrollPane cryptoInfoScroll = new JScrollPane(cryptoInfoPanel);
     public List userData = new List();
-    private final JPanel saldoPanel = BetterJFrame.BJPanel(0, 100, 1200, 800, new Color(12, 12, 125), false, new FlowLayout(), managePanel);
-    private final JButton sortAsc = BetterJFrame.BJButton(0, 100, 50, 50, darkRed, true, managePanel, "");
-    private final JButton sortDesc = BetterJFrame.BJButton(0, 150, 50, 50, darkRed, true, managePanel, "");
-    private final JButton sortAscStocks = BetterJFrame.BJButton(0, 100, 50, 50, darkRed, false, managePanel, "");
-    private final JButton sortDescStocks = BetterJFrame.BJButton(0, 150, 50, 50, darkRed, false, managePanel, "");
-    private final JButton downloadButton = BetterJFrame.BJButton(0, 210, 50, 50, darkRed, true, managePanel, "");
-    private final JButton historyButton = BetterJFrame.BJButton(0, 270, 50, 50, Color.black, false, managePanel, "H");
-    private final JButton trade = BetterJFrame.BJButton(0, 0, 300, 100, new Color(0, 130, 0), true, managePanel, "CRYPTOCURRENCIES");
-    private final JButton stockPrices = BetterJFrame.BJButton(300, 0, 300, 100, new Color(0, 130, 0), true, managePanel, "STOCK MARKET");
-    private final JButton logOut = BetterJFrame.BJButton(900, 0, 300, 100, new Color(0, 130, 0), true, managePanel, "LOGOUT");
-    private final JButton currSaldo = BetterJFrame.BJButton(600, 0, 300, 100, new Color(0, 130, 0), true, managePanel, "YOUR ASSETS");
-    private final JPanel historyPanel = BetterJFrame.BJPanel(100, 100, 1000, 800, new Color(12, 12, 125), false, new FlowLayout(), managePanel);
+
+    private final JPanel balancePanel = BetterJFrame.BJPanel(0, 100, 1200, 800, new Color(12, 12, 125), false, new FlowLayout(), managePanel);
+
+    private final JButton cryptoPage = BetterJFrame.BJButton(0, 0, 300, 100 ,darkGreen, true, managePanel, "CRYPTOCURRENCIES");
+    private final JButton stockPrices = BetterJFrame.BJButton(300, 0, 300, 100, darkGreen, true, managePanel, "STOCK MARKET");
+    private final JButton logOut = BetterJFrame.BJButton(900, 0, 300, 100, darkGreen, true, managePanel, "LOGOUT");
+    private final JButton currentBalance = BetterJFrame.BJButton(600, 0, 300, 100, darkGreen, true, managePanel, "YOUR ASSETS");
+
+    private final JPanel toolsPanel = BetterJFrame.BJPanel(0,100,1200, 50, grey, true, new FlowLayout(), managePanel);
+
+    private final JButton sortAsc = BetterJFrame.BJButton(0, 100, 150, 40, redBlack, true, toolsPanel, "SORT UP");
+    private final JButton sortDesc = BetterJFrame.BJButton(0, 150, 150, 40, redBlack, true, toolsPanel, "SORT DOWN");
+    private final JButton downloadButton = BetterJFrame.BJButton(0, 210, 150, 40, redBlack, true, toolsPanel, "DOWNLOAD");
+    private final JButton historyButton = BetterJFrame.BJButton(0, 270, 150, 40, redBlack, false, toolsPanel, "HISTORY");
+    private final JTextField searchInput = BetterJFrame.BJTextField(850,7, 80, 25, Color.white, true, toolsPanel, true, "", Color.BLACK);
+    private final JButton searchIcon = BetterJFrame.BJButton(0, 0, 25, 25, darkRed, true, toolsPanel, "");
+
+    private final JPanel historyPanel = BetterJFrame.BJPanel(100, 100, 1000, 800, lightBlack, false, new FlowLayout(), managePanel);
     private final JPanel analysisPanel = BetterJFrame.BJPanel(100, 200, 1000, 800, new Color(12, 128, 12), false, null, managePanel);
+
     private boolean isDownloadedCrypto = false;
     private boolean isDownloadedStock = false;
-    public JFrame makeUserInterface() {
+    private String currentPage = "neither";
+    public void makeUserInterface() {
         historyPanel.setBorder(BorderFactory.createEmptyBorder(100, 100, 100, 100));
-        Background backgroundPanel = new Background("kotek.jpg");
+        Background backgroundPanel = new Background("C:\\Users\\karol\\IdeaProjects\\CryptoTester\\src\\main\\java\\org\\example\\wallpaper.jpg");
         backgroundPanel.setVisible(true);
         backgroundPanel.setBounds(0,0, 1200, 800);
-        JPanel registerPage = BetterJFrame.BJPanel(460, 235, 280, 280, new Color(0, 0, 0), false, null, mainFrame);
-        JPanel loginPage = BetterJFrame.BJPanel(460, 235, 280, 280, new Color(0, 0, 0),true, null, mainFrame);
+        JPanel registerPage = BetterJFrame.BJPanel(460, 235, 280, 280, new Color(255, 255, 199, 125), false, null, mainFrame);
+        JPanel loginPage = BetterJFrame.BJPanel(460, 235, 280, 280, new Color(255, 255, 199, 125),true, null, mainFrame);
         mainFrame.add(backgroundPanel);
-        cryptoInfoPanel.setLayout(new FlowLayout());
-        cryptoInfoPanel.setBackground(Color.BLUE);
-        cryptoInfoScroll.setBounds(0, 100, 1185, 800);
+        cryptoInfoPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 14, 14));
+        cryptoInfoPanel.setBackground(grey);
+        cryptoInfoScroll.setBounds(-10, 140, 1210, 740);
         cryptoInfoScroll.remove(cryptoInfoScroll.getVerticalScrollBar());
         cryptoInfoScroll.setLayout(new ScrollPaneLayout());
-        cryptoInfoScroll.setBackground(Color.BLUE);
-        cryptoInfoScroll.addMouseWheelListener(e ->{
-            refreshMainFrame(mainFrame);
-        });
+        cryptoInfoScroll.setBackground(grey);
+        cryptoInfoScroll.addMouseWheelListener(e -> refreshMainFrame(mainFrame));
         cryptoInfoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         cryptoInfoScroll.getVerticalScrollBar().setUnitIncrement(20);
-        ImageIcon ascIcon = new ImageIcon("ASC.jpg");
-        ImageIcon descIcon = new ImageIcon("DESC.jpg");
+        ImageIcon searchIconImage = new ImageIcon("C:\\Users\\karol\\IdeaProjects\\CryptoTester\\src\\main\\java\\org\\example\\lupa.png");
+        searchIcon.setIcon(searchIconImage);
+        sortAsc.setToolTipText("Sort ascending");
+        sortAsc.setFont(new Font("Arial Regular", Font.BOLD, 17));
         sortAsc.setForeground(Color.WHITE);
-        sortAsc.setIcon(ascIcon);
         sortAsc.addActionListener(e -> {
             cryptoInfoPanel.removeAll();
-            creatingBlocks(Main.prices, "Crypto", 2, !isDownloadedCrypto);
+            creatingBlocks(2, currentPage.equals("Crypto") ? !isDownloadedCrypto : !isDownloadedStock);
         });
-        sortDesc.setIcon(descIcon);
+        sortDesc.setToolTipText("Sort descending");
+        sortDesc.setFont(new Font("Arial Regular", Font.BOLD, 17));
         sortDesc.addActionListener(e -> {
             cryptoInfoPanel.removeAll();
-            creatingBlocks(Main.prices, "Crypto", 1, !isDownloadedCrypto);
+            creatingBlocks(1, !currentPage.equals("Crypto") ? !isDownloadedCrypto : !isDownloadedStock);
         });
         sortDesc.setForeground(Color.WHITE);
-        sortAscStocks.setIcon(ascIcon);
-        sortAscStocks.setForeground(Color.WHITE);
-        sortAscStocks.addActionListener(e -> {
-            cryptoInfoPanel.removeAll();
-            creatingBlocks(Main.stockPrices, "stocks", 2, !isDownloadedStock);
-        });
-        sortDescStocks.setForeground(Color.WHITE);
-        sortDescStocks.setIcon(descIcon);
-        sortDescStocks.addActionListener(e1 -> {
-            cryptoInfoPanel.removeAll();
-            creatingBlocks(Main.stockPrices, "stocks", 1, !isDownloadedStock);
-        });
         downloadButton.setForeground(Color.white);
-        downloadButton.setIcon(new ImageIcon("REFRESH.jpg"));
+        downloadButton.setFont(new Font("Arial Regular", Font.BOLD, 17));
         downloadButton.addActionListener(e -> {
-            saldoPanel.removeAll();
+            balancePanel.removeAll();
             cryptoInfoPanel.removeAll();
             cryptoInfoPanel.setVisible(true);
             cryptoInfoScroll.setVisible(true);
-            saldoPanel.setVisible(false);
+            balancePanel.setVisible(false);
             managePanel.add(cryptoInfoScroll);
             try {
-                if (sortAsc.isVisible()) {
-                    cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
-                    sortingSwitch("Crypto");
-                    Main main = new Main();
-                    main.getData();
-                    Main.prices.put("USDT", 1/Main.prices.get("USDT"));
+                Main main = new Main();
+                cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
+                if (currentPage.equals("Crypto")) {
+                    main.getCrypto();
                     isDownloadedCrypto = true;
-                    creatingBlocks(Main.prices, "kot12", 2231, false);
                 }
                 else{
-                    cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
-                    sortingSwitch("Stock");
-                    Main main = new Main();
                     main.getStocks();
                     isDownloadedStock = true;
-                    creatingBlocks(Main.stockPrices, "stocks", 213, false);
                 }
-            }catch(ConcurrentModificationException ex){
-                System.out.println(ex.getMessage());
+                creatingBlocks(7, false);
             }
             catch(InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
         });
-        historyButton.setForeground(Color.green);
-        historyButton.setFont(new Font("Arial Bold", Font.PLAIN, 22));
+        historyButton.setForeground(Color.white);
+        historyButton.setFont(new Font("Arial Regular", Font.BOLD, 17));
         historyButton.addActionListener(e -> {
             if(historyPanel.isVisible())
             {
                 historyPanel.setVisible(false);
                 cryptoInfoScroll.setVisible(true);
                 historyPanel.removeAll();
+                switchButtons(true);
                 return;
             }
+            switchButtons(false);
             analysisPanel.setVisible(false);
             historyPanel.setVisible(true);
             cryptoInfoScroll.setVisible(false);
-            String type = sortAsc.isVisible() ? "crypto" : "stocks";
+            String type = currentPage;
             File[] files = FileOperations.getAllFiles(type);
             historyPanel.removeAll();
             for(File file : files)
             {
-                JButton savedDataButton = BetterJFrame.BJButton(0, 0, 200, 60, Color.BLACK, true, historyPanel, "");
+                JButton savedDataButton = BetterJFrame.BJButton(0, 0, 200, 60, redBlack, true, historyPanel, "");
                 savedDataButton.setFont(new Font("Arial Regular", Font.PLAIN, 14));
                 savedDataButton.setForeground(Color.WHITE);
                 savedDataButton.addActionListener(e1 -> {
-                    saldoPanel.removeAll();
+                    balancePanel.removeAll();
                     cryptoInfoPanel.removeAll();
                     cryptoInfoPanel.setVisible(true);
                     cryptoInfoScroll.setVisible(true);
-                    saldoPanel.setVisible(false);
+                    balancePanel.setVisible(false);
                     managePanel.add(cryptoInfoScroll);
                     cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
+                    switchButtons(true);
                     if(type.equals("crypto"))
                     {
                         Main.prices = FileOperations.readFile(file.toString());
-                        assert Main.prices != null;
-                        creatingBlocks(Main.prices, type, 2231, true);
                     }else{
                         Main.stockPrices = FileOperations.readFile(file.toString());
-                        assert Main.stockPrices != null;
-                        creatingBlocks(Main.stockPrices, type, 2231, true);
                     }
+                    creatingBlocks(2231, true);
 
                     historyPanel.setVisible(false);
                     isDownloadedCrypto = false;
@@ -156,45 +151,56 @@ public class UserInterface {
                 savedDataButton.setText(name);
             }
         });
-        JTextField currUser = new JTextField("Username");
+        searchInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                searchFunction();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                searchFunction();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                searchFunction();
+            }});
+
+            JTextField currUser = new JTextField("Username");
         logOut.setLayout(null);
         currUser.setBounds(110, 60, 80, 20);
         currUser.setHorizontalAlignment(0);
-        currUser.setBackground(new Color(0, 130, 0));
+        currUser.setBackground(darkGreen);
         currUser.setEditable(false);
         currUser.setForeground(Color.WHITE);
         currUser.setFont(new Font("Arial Bold", Font.PLAIN, 13 ));
         currUser.setBorder(null);
         logOut.add(currUser);
         currUser.setText("Username");
-        trade.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
-        trade.setForeground(Color.WHITE);
-        trade.addActionListener(e -> {
+        cryptoPage.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
+        cryptoPage.setForeground(Color.WHITE);
+        cryptoPage.addActionListener(e -> {
             offEverything();
             cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
-            trade.setBackground(Color.BLACK);
-            currSaldo.setBackground(new Color(0, 130, 0));
-            stockPrices.setBackground(new Color(0, 130, 0));
-            sortingSwitch("Crypto");
+            cryptoPage.setBackground(Color.BLACK);
+            currentBalance.setBackground(darkGreen);
+            stockPrices.setBackground(darkGreen);
+            currentPage = "Crypto";
             if(isDownloadedCrypto)
             {
-                creatingBlocks(Main.prices, "kot12", 2231, false);
+                creatingBlocks(2231, false);
                 return;
             }
             try{
                 String plik = Arrays.stream(FileOperations.getAllFiles("crypto")).toList().get(0).toString();
                 if(!plik.isEmpty())
                 {
-                    saldoPanel.removeAll();
+                    balancePanel.removeAll();
                     cryptoInfoPanel.removeAll();
                     cryptoInfoPanel.setVisible(true);
                     cryptoInfoScroll.setVisible(true);
-                    saldoPanel.setVisible(false);
+                    balancePanel.setVisible(false);
                     managePanel.add(cryptoInfoScroll);
                     cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
                     Main.prices = FileOperations.readFile(plik);
                     assert Main.prices != null;
-                    creatingBlocks(Main.prices, "kot12", 2231, true);
+                    creatingBlocks( 2231, true);
                 }
             }catch (ArrayIndexOutOfBoundsException e1)
             {
@@ -207,28 +213,28 @@ public class UserInterface {
             offEverything();
             cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1000));
             stockPrices.setBackground(Color.BLACK);
-            currSaldo.setBackground(new Color(0, 130, 0));
-            trade.setBackground(new Color(0, 130, 0));
-            sortingSwitch("Stock");
+            currentBalance.setBackground(darkGreen);
+            cryptoPage.setBackground(darkGreen);
+            currentPage = "Stock";
             if(isDownloadedStock)
             {
-                creatingBlocks(Main.stockPrices, "stocks", 2231, false);
+                creatingBlocks(2231, false);
                 return;
             }
             try{
                 String file = Arrays.stream(FileOperations.getAllFiles("stocks")).toList().get(0).toString();
                 if(!file.isEmpty())
                 {
-                    saldoPanel.removeAll();
+                    balancePanel.removeAll();
                     cryptoInfoPanel.removeAll();
                     cryptoInfoPanel.setVisible(true);
                     cryptoInfoScroll.setVisible(true);
-                    saldoPanel.setVisible(false);
+                    balancePanel.setVisible(false);
                     managePanel.add(cryptoInfoScroll);
                     cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
                     Main.stockPrices = FileOperations.readFile(file);
                     assert Main.stockPrices != null;
-                    creatingBlocks(Main.stockPrices, "stocks", 2231, true);
+                    creatingBlocks(2231, true);
                 }
             }catch (ArrayIndexOutOfBoundsException e1)
             {
@@ -241,17 +247,17 @@ public class UserInterface {
             offEverything();
             loginPage.setVisible(true);
             managePanel.setVisible(false);
-            sortingSwitch("fries maker");
+            currentPage = "anything";
         });
-        currSaldo.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
-        currSaldo.setForeground(Color.WHITE);
-        currSaldo.addActionListener(e ->{
+        currentBalance.setFont(new Font("Arial Bold", Font.PLAIN, 23 ));
+        currentBalance.setForeground(Color.WHITE);
+        currentBalance.addActionListener(e ->{
             offEverything();
-            sortingSwitch("fries maker");
-            saldoPanel.setVisible(true);
-            currSaldo.setBackground(Color.BLACK);
-            trade.setBackground(new Color(0, 130, 0));
-            stockPrices.setBackground(new Color(0, 130, 0));
+            currentPage = "anything";
+            balancePanel.setVisible(true);
+            currentBalance.setBackground(Color.BLACK);
+            cryptoPage.setBackground(darkGreen);
+            stockPrices.setBackground(darkGreen);
             for (Map.Entry<String, Double> entry : Main.saldoData.entrySet()){
                 String key = entry.getKey();
                 Double value = entry.getValue();
@@ -267,16 +273,19 @@ public class UserInterface {
                 textSaldo.setEditable(false);
                 textSaldo.setHorizontalAlignment(JTextField.CENTER);
                 saldoInfoPanel.add(textSaldo);
-                saldoPanel.add(saldoInfoPanel);
+                balancePanel.add(saldoInfoPanel);
             }
         });
-        JTextField loginText = BetterJFrame.BJTextField(40, 50, 200, 25, Color.WHITE, true, loginPage, true, "Username", null);
+        JTextField loginText = BetterJFrame.BJTextField(40, 50, 200, 25, grey, true, loginPage, true, "Username", null);
         loginText.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
                 loginText.setText("");
             }
         });
+        loginText.setForeground(Color.WHITE);
+        loginText.setFont(new Font("Arial regular", Font.PLAIN, 15));
+        loginText.setBorder(null);
         JPasswordField passwordText = new JPasswordField("Password");
         passwordText.addFocusListener(new FocusAdapter() {
             @Override
@@ -285,8 +294,15 @@ public class UserInterface {
             }
         });
         passwordText.setBounds(40, 100, 200, 25);
+        passwordText.setBackground(grey);
+        passwordText.setForeground(Color.WHITE);
+        passwordText.setFont(new Font("Arial regular", Font.PLAIN, 15));
+        passwordText.setBorder(null);
+
         JTextField loginDataError = BetterJFrame.BJTextField(40, 250, 200, 25, darkRed, false, loginPage, false, "Wrong Data", Color.WHITE);
-        JButton loginButton = BetterJFrame.BJButton(40, 150, 200, 25, Color.WHITE, true, loginPage, "LOGIN");
+        JButton loginButton = BetterJFrame.BJButton(40, 150, 200, 25, grey, true, loginPage, "LOGIN");
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFont(new Font("Arial regular", Font.PLAIN, 15));
         loginButton.addActionListener(e -> {
             userData.add(loginText.getText(), 0);
             userData.add(passwordText.getText(), 1);
@@ -302,22 +318,28 @@ public class UserInterface {
                     String plik = Arrays.stream(FileOperations.getAllFiles("crypto")).toList().get(0).toString();
                     if(!plik.isEmpty())
                     {
-                        saldoPanel.removeAll();
+                        balancePanel.removeAll();
                         cryptoInfoPanel.removeAll();
                         cryptoInfoPanel.setVisible(true);
                         cryptoInfoScroll.setVisible(true);
-                        saldoPanel.setVisible(false);
+                        balancePanel.setVisible(false);
                         managePanel.add(cryptoInfoScroll);
                         cryptoInfoPanel.setPreferredSize(new Dimension(1200, 1600));
-                        Main.prices = FileOperations.readFile(plik);
+                        Map<String, Double> isNull = FileOperations.readFile(plik);
+                        if (isNull != null){
+                            Main.prices = FileOperations.readFile(plik);
+                        }
                         assert Main.prices != null;
-                        creatingBlocks(Main.prices, "kot12", 2231, true);
+                        currentPage = "Crypto";
+                        creatingBlocks(2231, true);
                     }
                     refreshMainFrame(mainFrame);
                 }
             }
         });
-        JButton registerPageButton = BetterJFrame.BJButton(40, 200, 200, 25, Color.WHITE, true, loginPage, "REGISTER");
+        JButton registerPageButton = BetterJFrame.BJButton(40, 200, 200, 25, grey, true, loginPage, "REGISTER");
+        registerPageButton.setForeground(Color.WHITE);
+        registerPageButton.setFont(new Font("Arial regular", Font.PLAIN, 15));
         registerPageButton.addActionListener(e -> {
             loginPage.setVisible(false);
             registerPage.setVisible(true);
@@ -339,9 +361,20 @@ public class UserInterface {
                 passwordTextRegister.setText("");
             }
         });
+        JButton backButton = BetterJFrame.BJButton(0, 0, 40, 40, Color.red, true, registerPage, "<");
+        backButton.setForeground(Color.white);
+        backButton.setBorder(null);
+        backButton.setFont(new Font("Arial", Font.PLAIN, 22));
         passwordTextRegister.setBounds(40, 100, 200, 25);
         JTextField registerDataError = BetterJFrame.BJTextField(40, 200, 200, 25, darkRed, false, registerPage, false, "Try Again", Color.WHITE);
-        JButton registerButton = BetterJFrame.BJButton(40, 150, 200, 25, Color.WHITE, true, registerPage, "REGISTER");
+        JButton registerButton = BetterJFrame.BJButton(40, 150, 200, 25, grey, true, registerPage, "REGISTER");
+        backButton.addActionListener(e ->{
+            registerPage.setVisible(false);
+            loginPage.setVisible(true);
+            registerDataError.setVisible(false);
+        });
+        registerButton.setForeground(Color.WHITE);
+        registerButton.setFont(new Font("Arial regular", Font.PLAIN, 15));
         registerButton.addActionListener(e -> {
             List data = new List();
             data.add(loginTextRegister.getText(), 0);
@@ -357,20 +390,19 @@ public class UserInterface {
         });
         registerPage.add(passwordTextRegister);
         refreshMainFrame(mainFrame);
-        return mainFrame;
     }
     public void createCryptoBlock(double value, String name, boolean isHistory){
-        JPanel cryptoPanel = BetterJFrame.BJPanel(0, 0, 150, 100, Color.black, true, null, cryptoInfoPanel);
+        if(name.equals("failed"))return;
+        JPanel cryptoPanel = BetterJFrame.BJPanel(0, 0, 150, 120, lightBlack, true, null, cryptoInfoPanel);
         JTextField cryptoText = BetterJFrame.BJTextField(5, 15, 140, 20, Color.white, true, cryptoPanel, false,name + " : " + String.format("%.5f", value), Color.WHITE);
         cryptoText.setFont(new Font("Arial regular", Font.PLAIN, 13 ));
-        cryptoText.setBackground(darkRed);
+        cryptoText.setBackground(redBlack);
         cryptoText.setHorizontalAlignment(0);
-
-        JButton buyButton = BetterJFrame.BJButton(10, 45 , 65, 30, new Color(0, 155, 0), true, cryptoPanel, "BUY");
+        JButton buyButton = BetterJFrame.BJButton(10, 45 , 65, 30, darkGreen, true, cryptoPanel, "BUY");
         buyButton.setForeground(Color.WHITE);
         buyButton.addActionListener(e -> {
-            currSaldo.setEnabled(false);
-            trade.setEnabled(false);
+            currentBalance.setEnabled(false);
+            cryptoPage.setEnabled(false);
             logOut.setEnabled(false);
             stockPrices.setEnabled(false);
             cryptoInfoScroll.setVisible(false);
@@ -391,9 +423,7 @@ public class UserInterface {
                 }
             });
             JButton maxAmount = BetterJFrame.BJButton(105, 30, 80, 50, Color.WHITE, true, buyPanel, "Max");
-            maxAmount.addActionListener(e1 -> {
-                amount.setText(Double.toString(Main.saldoData.get("Money")/value));
-            });
+            maxAmount.addActionListener(e1 -> amount.setText(Double.toString(Main.saldoData.get("Money")/value)));
             JButton exitButton = BetterJFrame.BJButton(285, 30, 45, 45, darkRed, true, buyPanel, "X");
             exitButton.setForeground(Color.WHITE);
             exitButton.addActionListener(e1 -> {
@@ -402,8 +432,8 @@ public class UserInterface {
                 amount.setText("");
                 buyPanel.setVisible(false);
                 cryptoInfoScroll.setVisible(true);
-                currSaldo.setEnabled(true);
-                trade.setEnabled(true);
+                currentBalance.setEnabled(true);
+                cryptoPage.setEnabled(true);
                 logOut.setEnabled(true);
                 stockPrices.setEnabled(true);
             });
@@ -417,6 +447,7 @@ public class UserInterface {
                         valueError.setVisible(true);
                         return;}
                 }catch(NumberFormatException e3){
+                    valueError.setVisible(true);
                     return;
                 }
                 valueError.setVisible(false);
@@ -436,8 +467,8 @@ public class UserInterface {
                     buyPanel.setVisible(false);
                     cryptoInfoScroll.setVisible(true);
                     amount.setText("");
-                    currSaldo.setEnabled(true);
-                    trade.setEnabled(true);
+                    currentBalance.setEnabled(true);
+                    cryptoPage.setEnabled(true);
                     logOut.setEnabled(true);
                     stockPrices.setEnabled(true);
                 }
@@ -446,8 +477,8 @@ public class UserInterface {
         JButton sellButton = BetterJFrame.BJButton(75, 45 , 65, 30, darkRed, true, cryptoPanel, "SELL");
         sellButton.setForeground(Color.WHITE);
         sellButton.addActionListener(e -> {
-            currSaldo.setEnabled(false);
-            trade.setEnabled(false);
+            currentBalance.setEnabled(false);
+            cryptoPage.setEnabled(false);
             logOut.setEnabled(false);
             stockPrices.setEnabled(false);
             cryptoInfoScroll.setVisible(false);
@@ -457,8 +488,8 @@ public class UserInterface {
             exitButton.addActionListener(e2 -> {
                 sellPanel.setVisible(false);
                 cryptoInfoScroll.setVisible(true);
-                currSaldo.setEnabled(true);
-                trade.setEnabled(true);
+                currentBalance.setEnabled(true);
+                cryptoPage.setEnabled(true);
                 logOut.setEnabled(true);
                 stockPrices.setEnabled(true);
             });
@@ -478,9 +509,8 @@ public class UserInterface {
                 }
             });
             JButton maxAmount = BetterJFrame.BJButton(100, 30, 80, 50, Color.WHITE, true, sellPanel, "Max");
-            maxAmount.addActionListener(e1 -> {
-                amount.setText(Double.toString(Main.saldoData.get(name)));
-            });
+            maxAmount.addActionListener(e1 ->
+                    amount.setText(Double.toString(Main.saldoData.get(name))));
             JButton confirm = BetterJFrame.BJButton(10, 30, 80, 50,Color.WHITE, true, sellPanel, "Confirm");
             JTextField valueError = BetterJFrame.BJTextField(110, 82, 140, 20, Color.BLACK, false, sellPanel, false, "NOT ENOUGH ASSETS", Color.WHITE);
             confirm.addActionListener(e2 ->{
@@ -504,8 +534,8 @@ public class UserInterface {
                     sellPanel.setVisible(false);
                     cryptoInfoScroll.setVisible(true);
                     amount.setText("");
-                    currSaldo.setEnabled(true);
-                    trade.setEnabled(true);
+                    currentBalance.setEnabled(true);
+                    cryptoPage.setEnabled(true);
                     logOut.setEnabled(true);
                     stockPrices.setEnabled(true);
                 }
@@ -518,10 +548,13 @@ public class UserInterface {
             cryptoInfoScroll.setVisible(true);
             analysisPanel.removeAll();
             analysisPanel.add(exitAnalysisButton);
+            switchButtons(true);
+            historyButton.setEnabled(true);
         });
-        JButton hisButton = BetterJFrame.BJButton(20, 80, 20, 20, Color.WHITE, true, cryptoPanel, "H");
-        hisButton.setRolloverEnabled(false);
-        hisButton.addActionListener(e -> {
+        JButton chartButton = BetterJFrame.BJButton(35, 80, 80, 35, redBlack, true, cryptoPanel, "CHART");
+        chartButton.setRolloverEnabled(false);
+        chartButton.setForeground(Color.WHITE);
+        chartButton.addActionListener(e -> {
             if(analysisPanel.isVisible())
             {
                 analysisPanel.setVisible(false);
@@ -529,6 +562,8 @@ public class UserInterface {
                 analysisPanel.removeAll();
                 return;
             }
+            switchButtons(false);
+            historyButton.setEnabled(false);
             cryptoInfoScroll.setVisible(false);
             analysisPanel.setVisible(true);
             String type = Main.prices.containsKey(name) || name.equals("BTC") ? "crypto" : "stocks";
@@ -537,27 +572,11 @@ public class UserInterface {
             Map<String, Double> map = new LinkedHashMap<>();
             for(File file :files)
             {
-                if(type.equals("stocks")) {
-                    try {
-                        double valueFromFile = Objects.requireNonNull(FileOperations.readFile(file.toString())).get(name);
-                        map.put(file.toString(), valueFromFile);
-                    } catch (NullPointerException z) {
-                        z.getMessage();
-                    }
-                }else{
-                    if(!name.equals("BTC"))
-                    {
-                        double bitcoinPrice = Objects.requireNonNull(FileOperations.readFile(file.toString())).get("USDT");
-                        try{
-                            double valueFromFile = Objects.requireNonNull(FileOperations.readFile(file.toString())).get(name) * bitcoinPrice;
-                            map.put(file.toString(), valueFromFile);
-                        }catch(NullPointerException z)
-                        {
-                            z.getMessage();
-                        }
-                        continue;
-                    }
-                    map.put(file.toString(), Objects.requireNonNull(FileOperations.readFile(file.toString())).get("USDT"));
+                try {
+                    double valueFromFile = Objects.requireNonNull(FileOperations.readFile(file.toString())).get(name);
+                    map.put(file.toString(), valueFromFile);
+                } catch (NullPointerException z) {
+                    z.getMessage();
                 }
             }
             Collection<Double> values = map.values();
@@ -572,10 +591,10 @@ public class UserInterface {
                     double val = (vall - minValue) / (maxValue - minValue);
                     int y = 20 + (int) (460 - 460 * val);
                     Color color = i % 2 == 0 ? Color.green : Color.black;
-                    JButton date = BetterJFrame.BJButton(20 + (900 / values.size()) * i, 520, 900/values.size(), 15, Color.black, true, analysisPanel, "");
+                    JButton date = BetterJFrame.BJButton(40 + (860 / values.size()) * i, 520, 860/values.size(), 15, Color.black, true, analysisPanel, "");
                     String formattedDate = key.replace(".txt", "").replace("cryptoHistoryData", "").replace("stocksHistoryData", "").replace("_", ":");
                     date.setToolTipText(formattedDate);
-                    JButton valueAtDate = BetterJFrame.BJButton(20 + (900 / values.size()) * i, y, (900 / values.size()), 520 - y, color, true, analysisPanel, "");
+                    JButton valueAtDate = BetterJFrame.BJButton(40 + (860 / values.size()) * i, y, (860 / values.size()), 520 - y, color, true, analysisPanel, "");
                     valueAtDate.setToolTipText(vall.toString());
                     i++;
                 }
@@ -605,17 +624,18 @@ public class UserInterface {
         analysisPanel.setVisible(false);
         historyPanel.removeAll();
         historyPanel.setVisible(false);
-        saldoPanel.removeAll();
+        balancePanel.removeAll();
         analysisPanel.setVisible(false);
         analysisPanel.removeAll();
         cryptoInfoPanel.removeAll();
         cryptoInfoPanel.setVisible(true);
         cryptoInfoScroll.setVisible(true);
-        saldoPanel.setVisible(false);
+        balancePanel.setVisible(false);
     }
     // any normal, 1 desc, 2 asc
-    private void creatingBlocks(Map<String, Double> map, String type, int sort, boolean isHistory){
+    private void creatingBlocks( int sort, boolean isHistory){
         LinkedHashMap<String, Double> sortedMap;
+        Map<String, Double> map = currentPage.equals("Crypto") ? Main.prices : Main.stockPrices;
         sortedMap = map.entrySet()
                 .stream()
                 .sorted(selectSort(sort))
@@ -623,52 +643,35 @@ public class UserInterface {
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-        if(type.equals("stocks")){
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                if(value == 0.0){continue;}
-                createCryptoBlock(value, key, isHistory);
-            }
-        }else{
-            double bitcoinPrice = map.get("USDT");
-            for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
-                String key = entry.getKey();
-                Double value = entry.getValue();
-                if(value == 0.0){continue;}
-                if(key.equals("USDT")){
-                    createCryptoBlock(bitcoinPrice, "BTC", isHistory);
-                }else{
-                    value *= bitcoinPrice;
-                    createCryptoBlock(value, key, isHistory);
-                }
+        for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+            String key = entry.getKey();
+            Double value = entry.getValue();
+            if(value == 0.0){continue;}
+            createCryptoBlock(value, key, isHistory);
             }
         }
-    }
-    private void sortingSwitch(String type)
-    {
-        sortAsc.setVisible(false);
-        sortDesc.setVisible(false);
-        sortAscStocks.setVisible(false);
-        sortDescStocks.setVisible(false);
-        downloadButton.setVisible(false);
-        historyButton.setVisible(false);
-        if(type.equals("Stock"))
-        {
-            sortAscStocks.setVisible(true);
-            sortDescStocks.setVisible(true);
-            downloadButton.setVisible(true);
-            historyButton.setVisible(true);
-        }else if (type.equals("Crypto")){
-            sortAsc.setVisible(true);
-            sortDesc.setVisible(true);
-            downloadButton.setVisible(true);
-            historyButton.setVisible(true);
-        }
-        refreshMainFrame(mainFrame);
-    }
-    public static void refreshMainFrame(JFrame frame){
+    private static void refreshMainFrame(JFrame frame){
         frame.revalidate();
         frame.repaint();
+    }
+    private void switchButtons(boolean bool)
+    {
+        sortAsc.setEnabled(bool);
+        sortDesc.setEnabled(bool);
+        downloadButton.setEnabled(bool);
+    }
+    public void searchFunction()
+    {
+        boolean page = currentPage.equals("Crypto");
+        Set<Map.Entry<String, Double>> entrySet = page ? Main.prices.entrySet() : Main.stockPrices.entrySet();
+        boolean cryptoOrStock = page ? !isDownloadedCrypto : !isDownloadedStock;
+        cryptoInfoPanel.removeAll();
+        for (Map.Entry<String, Double> entry : entrySet) {
+            String key = entry.getKey();
+            Double value = entry.getValue();
+            if(value == 0.0){continue;}
+            if(!key.contains(searchInput.getText())){continue;}
+            createCryptoBlock(value, key, cryptoOrStock);
+        }
     }
 }

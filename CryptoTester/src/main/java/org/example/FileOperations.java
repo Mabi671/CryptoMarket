@@ -1,10 +1,12 @@
 package org.example;
 import java.awt.*;
+import java.awt.List;
 import java.io.*;
-import java.util.Map;
+import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 public class FileOperations {
     public static String reservedCharsRegex = "[<>\":/\\\\|?*]";
     public static void createFolder(String folderName){
@@ -19,17 +21,15 @@ public class FileOperations {
     {
             File folder = new File(type+"HistoryData/");
             return folder.listFiles();
-
     }
-
     public static boolean createFile(List data, boolean create){
-        String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
-        fileNameforWin = fileNameforWin.replaceAll("\t", "");
-        File test = new File(fileNameforWin);
+        String fileNameForWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
+        fileNameForWin = fileNameForWin.replaceAll("\t", "");
+        File test = new File(fileNameForWin);
         if(test.exists() && create){
             return false;
         }
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameforWin))) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameForWin))) {
             out.writeObject(data);
             out.writeObject(Main.saldoData);
             return true;
@@ -38,27 +38,25 @@ public class FileOperations {
         }
     }
     public static void createFile(Map<String, Double> data,  String name, String type){
-        String fileNameforWin = type+"HistoryData/" + name + ".txt";
-        fileNameforWin = fileNameforWin.replaceAll(":", "_");
-        if(type.equals("crypto"))
-        {
-            data.put("USDT", 1/data.get("USDT"));
-        }
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameforWin))) {
+        String fileNameForWin = type+"HistoryData/" + name + ".txt";
+        fileNameForWin = fileNameForWin.replaceAll(":", "_");
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameForWin))) {
             out.writeObject(data);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
+    @SuppressWarnings (value="unchecked")
     public static List readFile(List data){
-        String fileNameforWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
-        fileNameforWin = fileNameforWin.replaceAll("\t", "");
-        File test = new File(fileNameforWin);
+        String fileNameForWin = data.getItem(0).replaceAll(reservedCharsRegex, "") + "File.txt";
+        fileNameForWin = fileNameForWin.replaceAll("\t", "");
+        File test = new File(fileNameForWin);
         if(!test.exists()){
             return null;
         }
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileNameforWin))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileNameForWin))) {
             List readArray = (List) in.readObject();
+
             Map<String, Double> readDataMap = (Map<String, Double>) in.readObject();
             for (String key : readDataMap.keySet()) {
                 Main.saldoData.put(key, readDataMap.get(key));
@@ -66,14 +64,15 @@ public class FileOperations {
             return readArray;
         } catch (IOException | ClassNotFoundException e) {
             return null;
-     }
+        }
     }
+    @SuppressWarnings (value="unchecked")
     public static Map<String, Double> readFile(String fileName){
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName))) {
             return (Map<String, Double>) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        }catch (IOException | ClassNotFoundException e){
             return null;
         }
-}
+    }
 }
 
